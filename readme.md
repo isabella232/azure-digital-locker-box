@@ -10,6 +10,8 @@ illustrate Digital Locker using an example of an owner performing access control
 to their document held by a bank.  The state transition diagram below shows the
 interactions among the states in this workflow. 
 
+<br />
+
 Application Roles 
 ------------------
 
@@ -19,6 +21,8 @@ Application Roles 
 | BankAgent              | The keeper of the digital asset.                  |
 | ThirdPartyRequestor    | A person requesting access to the digital asset.  |
 | CurrentAuthorizedUser  | A person authorized to access the digital asset.  |
+
+<br />
 
 States 
 -------
@@ -30,10 +34,12 @@ States 
 | SharingWithThirdParty  | Indicates that the owner is reviewing a third party's request to access the digital asset.                 |
 | Terminated             | Indicates termination of sharing the digital asset.                                                        |
 
+<br />
+
  Workflow Details
 -----------------
 
-![state diagram of the workflow](media/3540f1547a7326c32df839411dfbf0b8.png)
+![state diagram of the workflow](https://raw.githubusercontent.com/caleteeter/digital-locker/master/media/3540f1547a7326c32df839411dfbf0b8.png)
 
 An instance of the Digital Locker application's workflow starts in the Requested
 state when an Owner requests their bank to begin a process of sharing a document
@@ -62,8 +68,10 @@ the document once the document becomes available to share. 
 The happy path shown in the state transition diagram traces a path where the
 owner grants access to a random third party. 
 
+<br />
+
 Application Files
 -----------------
-[DigitalLocker.json](./ethereum/DigitalLocker.json)
+[DigitalLocker.json](https://raw.githubusercontent.com/caleteeter/digital-locker/master/DigitalLocker.json)
 
-[DigitalLocker.sol](./ethereum/DigitalLocker.sol)
+[DigitalLocker.sol](https://raw.githubusercontent.com/caleteeter/digital-locker/master/contracts/DigitalLocker.sol)
