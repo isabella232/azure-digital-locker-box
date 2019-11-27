@@ -142,6 +142,6 @@ contract DigitalLocker {
         }
         CurrentAuthorizedUser = address(0x000);
         State = StateType.Terminated;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "Terminate, msg.sender);
+        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "Terminate", msg.sender);
     }
 }
