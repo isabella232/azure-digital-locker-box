@@ -18,7 +18,7 @@ contract DigitalLocker {
     string public WorkflowName;
 
     event LogWorkbenchContractCreated(string applicationName, string workflowName, address originatingAddress);
-    event LogWorkbenchContractUpdated (string applicationName, string workflowName, string action, address originatingAddress);
+    event LogWorkbenchContractUpdated(string applicationName, string workflowName, string action, address originatingAddress);
 
     constructor(string memory lockerFriendlyName, address bankAgent) public {
         Owner = msg.sender;
@@ -121,8 +121,8 @@ contract DigitalLocker {
             revert("only current authorized user can release locker access");
         }
         LockerStatus = "Available";
-        ThirdPartyRequestor = 0x0;
-        CurrentAuthorizedUser = 0x0;
+        ThirdPartyRequestor = address(0x000);
+        CurrentAuthorizedUser = address(0x000);
         IntendedPurpose = "";
         State = StateType.AvailableToShare;
         emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "AvailableToShare", msg.sender);
@@ -142,6 +142,6 @@ contract DigitalLocker {
         }
         CurrentAuthorizedUser = address(0x000);
         State = StateType.Terminated;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "Terminate, msg.sender);
+        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "Terminate", msg.sender);
     }
 }
