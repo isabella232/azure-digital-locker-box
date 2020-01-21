@@ -17,8 +17,8 @@ contract DigitalLocker {
     string public ApplicationName;
     string public WorkflowName;
 
-    event LogWorkbenchContractCreated(string applicationName, string workflowName, address originatingAddress);
-    event LogWorkbenchContractUpdated(string applicationName, string workflowName, string action, address originatingAddress);
+    event LogContractCreated(string applicationName, string workflowName, address originatingAddress);
+    event LogContractUpdated(string applicationName, string workflowName, string action, address originatingAddress);
 
     constructor(string memory lockerFriendlyName, address bankAgent) public {
         Owner = msg.sender;
@@ -30,7 +30,7 @@ contract DigitalLocker {
 
         BankAgent = bankAgent;
 
-        emit LogWorkbenchContractCreated(ApplicationName, WorkflowName, msg.sender);
+        emit LogContractCreated(ApplicationName, WorkflowName, msg.sender);
     }
 
     function BeginReviewProcess() public {
@@ -44,7 +44,7 @@ contract DigitalLocker {
 
         LockerStatus = "Pending";
         State = StateType.DocumentReview;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "BeginReviewProcess", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "BeginReviewProcess", msg.sender);
     }
 
     function RejectApplication(string memory rejectionReason) public {
@@ -55,7 +55,7 @@ contract DigitalLocker {
         RejectionReason = rejectionReason;
         LockerStatus = "Rejected";
         State = StateType.DocumentReview;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "RejectApplication", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "RejectApplication", msg.sender);
     }
 
     function UploadDocuments(string memory lockerIdentifier, string memory image) public {
@@ -66,7 +66,7 @@ contract DigitalLocker {
             Image = image;
             LockerIdentifier = lockerIdentifier;
             State = StateType.AvailableToShare;
-            emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "UploadDocuments", msg.sender);
+            emit LogContractUpdated(ApplicationName, WorkflowName, "UploadDocuments", msg.sender);
     }
 
     function ShareWithThirdParty(address thirdPartyRequestor, string memory expirationDate, string memory intendedPurpose) public {
@@ -81,7 +81,7 @@ contract DigitalLocker {
         IntendedPurpose = intendedPurpose;
         ExpirationDate = expirationDate;
         State = StateType.SharingWithThirdParty;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "ShareWithThirdParty", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "ShareWithThirdParty", msg.sender);
     }
 
     function AcceptSharingRequest() public {
@@ -91,7 +91,7 @@ contract DigitalLocker {
 
         CurrentAuthorizedUser = ThirdPartyRequestor;
         State = StateType.SharingWithThirdParty;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "AcceptSharingRequest", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "AcceptSharingRequest", msg.sender);
     }
 
     function RejectSharingRequest() public {
@@ -101,7 +101,7 @@ contract DigitalLocker {
             LockerStatus = "Available";
             CurrentAuthorizedUser = address(0x000);
             State = StateType.AvailableToShare;
-            emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "RejectSharingRequest", msg.sender);
+            emit LogContractUpdated(ApplicationName, WorkflowName, "RejectSharingRequest", msg.sender);
     }
 
     function RequestLockerAccess(string memory intendedPurpose) public {
@@ -112,7 +112,7 @@ contract DigitalLocker {
         ThirdPartyRequestor = msg.sender;
         IntendedPurpose = intendedPurpose;
         State = StateType.SharingRequestPending;
-                emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "RequestLockerAccess", msg.sender);
+                emit LogContractUpdated(ApplicationName, WorkflowName, "RequestLockerAccess", msg.sender);
     }
 
     function ReleaseLockerAccess() public {
@@ -125,7 +125,7 @@ contract DigitalLocker {
         CurrentAuthorizedUser = address(0x000);
         IntendedPurpose = "";
         State = StateType.AvailableToShare;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "AvailableToShare", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "AvailableToShare", msg.sender);
     }
     function RevokeAccessFromThirdParty() public {
         if (Owner != msg.sender) {
@@ -134,7 +134,7 @@ contract DigitalLocker {
             LockerStatus = "Available";
             CurrentAuthorizedUser = address(0x000);
             State = StateType.AvailableToShare;
-            emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "RevokeAccessFromThirdParty", msg.sender);
+            emit LogContractUpdated(ApplicationName, WorkflowName, "RevokeAccessFromThirdParty", msg.sender);
     }
     function Terminate() public {
         if (Owner != msg.sender) {
@@ -142,6 +142,6 @@ contract DigitalLocker {
         }
         CurrentAuthorizedUser = address(0x000);
         State = StateType.Terminated;
-        emit LogWorkbenchContractUpdated(ApplicationName, WorkflowName, "Terminate", msg.sender);
+        emit LogContractUpdated(ApplicationName, WorkflowName, "Terminate", msg.sender);
     }
 }
