@@ -9,10 +9,8 @@ contract('DigitalLocker', accounts => {
     it('should return a new instance of the contract with a bankAgent', async() => {
         const digitalLocker = await DigitalLocker.deployed();
         const owner = await digitalLocker.Owner();
-        // const bankAgent = await digitalLocker.bankAgent();
 
         assert.notEqual(bankAgent, owner, 'owner not correctly set');
-        // assert.equal(supplyChainObserver, observer, 'observer not correctly set');
     });
 
     it('someone should be able to begin review process', async() => {
@@ -24,7 +22,6 @@ contract('DigitalLocker', accounts => {
         truffleAssert.eventEmitted(result, 'LogContractUpdated', (ev) => {
             return ev.action == 'BeginReviewProcess';
         }, 'Contract should emit the correct message');
-
     });
 
     it('owner should not be able to begin review process', async() => {
@@ -172,5 +169,4 @@ contract('DigitalLocker', accounts => {
 
         await truffleAssert.reverts(digitalLocker.Terminate({ from: bankAgent }));
     });
-
 });
