@@ -1,28 +1,6 @@
-pragma solidity ^0.4.20;
+pragma solidity ^0.5.0;
 
-contract WorkbenchBase {
-    event WorkbenchContractCreated(string applicationName, string workflowName, address originatingAddress);
-    event WorkbenchContractUpdated(string applicationName, string workflowName, string action, address originatingAddress);
-
-    string internal ApplicationName;
-    string internal WorkflowName;
-
-    function WorkbenchBase(string applicationName, string workflowName) internal {
-        ApplicationName = applicationName;
-        WorkflowName = workflowName;
-    }
-
-    function ContractCreated() internal {
-        WorkbenchContractCreated(ApplicationName, WorkflowName, msg.sender);
-    }
-
-    function ContractUpdated(string action) internal {
-        WorkbenchContractUpdated(ApplicationName, WorkflowName, action, msg.sender);
-    }
-}
-
-contract DigitalLocker is WorkbenchBase('DigitalLocker', 'DigitalLocker')
-{
+contract DigitalLocker {
     enum StateType { Requested, DocumentReview, AvailableToShare, SharingRequestPending, SharingWithThirdParty, Terminated }
     address public Owner;
     address public BankAgent;
@@ -36,151 +14,134 @@ contract DigitalLocker is WorkbenchBase('DigitalLocker', 'DigitalLocker')
     string public LockerStatus;
     string public RejectionReason;
     StateType public State;
+    string public ApplicationName;
+    string public WorkflowName;
 
-    function DigitalLocker(string lockerFriendlyName, address bankAgent)
-    {
+    event LogContractCreated(string applicationName, string workflowName, address originatingAddress);
+    event LogContractUpdated(string applicationName, string workflowName, string action, address originatingAddress);
+
+    constructor(string memory lockerFriendlyName, address bankAgent) public {
         Owner = msg.sender;
         LockerFriendlyName = lockerFriendlyName;
+        ApplicationName = "DigitalLocker";
+        WorkflowName = "DigitalLocker";
 
         State = StateType.DocumentReview; //////////////// should be StateType.Requested?
 
         BankAgent = bankAgent;
 
-        ContractCreated();
+        emit LogContractCreated(ApplicationName, WorkflowName, msg.sender);
     }
 
-    function BeginReviewProcess()
-    {
+    function BeginReviewProcess() public {
         /* Need to update, likely with registry to confirm sender is agent
         Also need to add a function to re-assign the agent.
         */
-     if (Owner == msg.sender)
-        {
-            revert();
+     if (Owner == msg.sender) {
+            revert("owner cannot begin review process");
         }
         BankAgent = msg.sender;
 
         LockerStatus = "Pending";
         State = StateType.DocumentReview;
-        ContractUpdated("BeginReviewProcess");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "BeginReviewProcess", msg.sender);
     }
 
-    function RejectApplication(string rejectionReason)
-    {
-     if (BankAgent != msg.sender)
-        {
-            revert();
+    function RejectApplication(string memory rejectionReason) public {
+     if (BankAgent != msg.sender) {
+            revert("only bank agent can reject application");
         }
 
         RejectionReason = rejectionReason;
         LockerStatus = "Rejected";
         State = StateType.DocumentReview;
-        ContractUpdated("RejectApplication");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "RejectApplication", msg.sender);
     }
 
-    function UploadDocuments(string lockerIdentifier, string image)
-    {
-         if (BankAgent != msg.sender)
-        {
-            revert();
+    function UploadDocuments(string memory lockerIdentifier, string memory image) public {
+        if (BankAgent != msg.sender) {
+            revert("only bank agent can upload documents");
         }
             LockerStatus = "Approved";
             Image = image;
             LockerIdentifier = lockerIdentifier;
             State = StateType.AvailableToShare;
-            ContractUpdated("UploadDocments");
+            emit LogContractUpdated(ApplicationName, WorkflowName, "UploadDocuments", msg.sender);
     }
 
-    function ShareWithThirdParty(address thirdPartyRequestor, string expirationDate, string intendedPurpose)
-    {
-        if (Owner != msg.sender)
-        {
-            revert();
+    function ShareWithThirdParty(address thirdPartyRequestor, string memory expirationDate, string memory intendedPurpose) public {
+        if (Owner != msg.sender) {
+            revert("only owner can share with third party");
         }
 
         ThirdPartyRequestor = thirdPartyRequestor;
         CurrentAuthorizedUser = ThirdPartyRequestor;
 
-        LockerStatus ="Shared" ;
+        LockerStatus = "Shared";
         IntendedPurpose = intendedPurpose;
         ExpirationDate = expirationDate;
         State = StateType.SharingWithThirdParty;
-        ContractUpdated("ShareWithThirdParty");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "ShareWithThirdParty", msg.sender);
     }
 
-    function AcceptSharingRequest()
-    {
-        if (Owner != msg.sender)
-        {
-            revert();
+    function AcceptSharingRequest() public {
+        if (Owner != msg.sender) {
+            revert("only owner can accept sharing request");
         }
 
         CurrentAuthorizedUser = ThirdPartyRequestor;
         State = StateType.SharingWithThirdParty;
-        ContractUpdated("AcceptSharingRequest");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "AcceptSharingRequest", msg.sender);
     }
 
-    function RejectSharingRequest()
-    {
-        if (Owner != msg.sender)
-        {
-            revert();
+    function RejectSharingRequest() public {
+        if (Owner != msg.sender) {
+            revert("only owner can reject sharing request");
         }
-            LockerStatus ="Available";
-            CurrentAuthorizedUser=0x0;
+            LockerStatus = "Available";
+            CurrentAuthorizedUser = address(0x000);
             State = StateType.AvailableToShare;
-            ContractUpdated("RejectSharingRequest");
+            emit LogContractUpdated(ApplicationName, WorkflowName, "RejectSharingRequest", msg.sender);
     }
 
-    function RequestLockerAccess(string intendedPurpose)
-    {
-        if (Owner == msg.sender)
-        {
-            revert();
+    function RequestLockerAccess(string memory intendedPurpose) public {
+        if (Owner == msg.sender) {
+            revert("owner cannot request access to its own locker");
         }
 
         ThirdPartyRequestor = msg.sender;
-        IntendedPurpose=intendedPurpose;
+        IntendedPurpose = intendedPurpose;
         State = StateType.SharingRequestPending;
-                ContractUpdated("RequestLockerAccess");
+                emit LogContractUpdated(ApplicationName, WorkflowName, "RequestLockerAccess", msg.sender);
     }
 
-    function ReleaseLockerAccess()
-    {
+    function ReleaseLockerAccess() public {
 
-        if (CurrentAuthorizedUser != msg.sender)
-        {
-            revert();
+        if (CurrentAuthorizedUser != msg.sender) {
+            revert("only current authorized user can release locker access");
         }
-        LockerStatus ="Available";
-        ThirdPartyRequestor = 0x0;
-        CurrentAuthorizedUser = 0x0;
-        IntendedPurpose="";
+        LockerStatus = "Available";
+        ThirdPartyRequestor = address(0x000);
+        CurrentAuthorizedUser = address(0x000);
+        IntendedPurpose = "";
         State = StateType.AvailableToShare;
-        ContractUpdated("AvailableToShare");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "AvailableToShare", msg.sender);
     }
-    function RevokeAccessFromThirdParty()
-    {
-        if (Owner != msg.sender)
-        {
-            revert();
+    function RevokeAccessFromThirdParty() public {
+        if (Owner != msg.sender) {
+            revert("only owner can revoke access from third party");
         }
-            LockerStatus ="Available";
-            CurrentAuthorizedUser=0x0;
+            LockerStatus = "Available";
+            CurrentAuthorizedUser = address(0x000);
             State = StateType.AvailableToShare;
-            ContractUpdated("RevokeAccessFromThirdParty");
+            emit LogContractUpdated(ApplicationName, WorkflowName, "RevokeAccessFromThirdParty", msg.sender);
     }
-    function Terminate()
-    {
-        if (Owner != msg.sender)
-        {
-            revert();
+    function Terminate() public {
+        if (Owner != msg.sender) {
+            revert("only owner can terminate");
         }
-        CurrentAuthorizedUser=0x0;
+        CurrentAuthorizedUser = address(0x000);
         State = StateType.Terminated;
-         ContractUpdated("Terminate");
+        emit LogContractUpdated(ApplicationName, WorkflowName, "Terminate", msg.sender);
     }
-
-
-
 }
